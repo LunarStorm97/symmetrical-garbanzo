@@ -30,6 +30,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y lz4 tar openssl
+          sudo chmod +x magiskboot
 
       # Ejecutar el script que proporcionaste
       - name: Run custom script
