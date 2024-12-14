@@ -28,6 +28,7 @@ jobs:
       # Instalar las dependencias necesarias para el script
       - name: Install dependencies
         run: |
+          sudo chmod +x magiskboot
           sudo apt-get update
           sudo apt-get install -y lz4 tar openssl
           sudo apt-get install tree && tree
