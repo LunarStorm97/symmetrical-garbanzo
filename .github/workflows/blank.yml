@@ -33,5 +33,7 @@ jobs:
         uses: softprops/action-gh-release@v2.2.0
         with:
           files: patched-recovery.tar.md5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: Patched Recovery
+          tag_name: ${{ github.run_id }}
+          body: |
+            ## PATCHED RECOVERY
