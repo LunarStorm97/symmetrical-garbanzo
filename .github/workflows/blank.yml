@@ -19,8 +19,7 @@ jobs:
           sudo chmod +x magiskboot
           sudo chmod +x patch.sh
           sudo apt update
-          sudo apt upgrade -y
-           sudo apt-get install -y lz4 tar openssl
+          sudo apt-get install -y lz4 tar openssl
 
       - name: Run custom script
         run: |
@@ -31,4 +30,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: patched-recovery
-          path: ./patched-recovery.tar.md5
+          path: patched-recovery.tar.md5
