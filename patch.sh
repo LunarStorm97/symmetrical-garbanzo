@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Instalar dependencias necesarias
 apt-get install lz4 tar openssl
 

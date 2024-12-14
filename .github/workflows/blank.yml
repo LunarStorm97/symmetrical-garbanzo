@@ -19,7 +19,6 @@ jobs:
           sudo chmod +x magiskboot
           sudo chmod +x patch.sh
           sudo apt update
-          sudo apt upgrade -y
           sudo apt-get install -y lz4 tar openssl
 
       - name: Run custom script
