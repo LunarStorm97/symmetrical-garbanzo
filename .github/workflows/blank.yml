@@ -1,10 +1,14 @@
+#!/bin/bash
+
 name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+      - "main"
   pull_request:
-    branches: [ "main" ]
+    branches: 
+      - "main"
   workflow_dispatch:
 
 jobs:
@@ -12,20 +16,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
 
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y lz4 tar openssl
-          sudo chmod +x magiskboot
 
-      - name: Execute custom script
+      - name: Execute script
         run: |
+          chmod +x magiskboot
           bash patch.sh
-          
-      - name: Upload patched-recovery.tar.md5 as artifact
-        uses: actions/upload-artifact@v3
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2.2.0
         with:
-          name: patched-recovery
-          path: patched-recovery.tar.md5
+          files: patched-recovery.tar.md5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
