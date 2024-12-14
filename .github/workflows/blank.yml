@@ -25,28 +25,28 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4.2.2
 
-      # Instalar las dependencias necesarias
+      # Instalar las dependencias necesarias para el script
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y lz4 tar openssl
-          sudo chmod +x magiskboot
+          sudo apt-get install tree && tree
 
-      # Ejecutar el script que proporcionaste
+      # Ejecutar el script
       - name: Run custom script
         run: |
-          if [ -f recovery.img.lz4 ];then
+          if [ -f recovery.img.lz4 ]; then
             lz4 -f recovery.img.lz4 recovery.img
           fi
 
-          if [ -f recovery.img.lz4 ];then
+          if [ -f recovery.img.lz4 ]; then
             mv recovery.img.lz4 recovery.img.lz4-orig
           fi
 
           off=$(grep -ab -o SEANDROIDENFORCE recovery.img | tail -n 1 | cut -d : -f 1)
           dd if=recovery.img of=r.img bs=4k count=$off iflag=count_bytes
 
-          if [ ! -f phh.pem ];then
+          if [ ! -f phh.pem ]; then
             openssl genrsa -f4 -out phh.pem 4096
           fi
 
@@ -77,13 +77,13 @@ jobs:
           rm recovery.img
           mv recovery-patched.img recovery.img
 
-          if [ -f recovery.img ];then
+          if [ -f recovery.img ]; then
             lz4 -B6 --content-size recovery.img
           fi
 
           tar cvf patched-recovery.tar recovery.img.lz4 vbmeta.img.lz4
 
-          if [ -f patched-recovery.tar ];then
+          if [ -f patched-recovery.tar ]; then
             md5sum -t patched-recovery.tar >> patched-recovery.tar
           fi
 
@@ -94,11 +94,4 @@ jobs:
           rm recovery.img
           rm recovery.img.lz4
           rm phh.pem
-          rm prop.default
-
-      # Subir el archivo parcheado como artifact
-      - name: Upload patched recovery as artifact
-        uses: actions/upload-artifact@v4.4.3
-        with:
-          name: patched-recovery
-          path: patched-recovery.tar.md5
+          rm prop.default 
