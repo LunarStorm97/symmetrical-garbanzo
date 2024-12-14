@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4.2.2
@@ -20,7 +20,7 @@ jobs:
           sudo chmod +x patch.sh
           sudo apt update
           sudo apt upgrade -y
-           sudo apt-get install -y lz4 tar openssl
+          sudo apt-get install -y lz4 tar openssl
 
       - name: Run custom script
         run: |
