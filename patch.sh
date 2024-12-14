@@ -57,7 +57,7 @@ cd ..
 # Comprimir y empaquetar archivos finales
 if [ -f recovery-patched.img ]; then
     mv recovery-patched.img recovery.img
-    lz4 -B6 --content-size recovery.img
+    lz4 -B6 --content-size recovery.img recovery.img.lz4
     tar cvf patched-recovery.tar recovery.img.lz4 vbmeta.img.lz4
     md5sum -t patched-recovery.tar >> patched-recovery.tar
     mv patched-recovery.tar patched-recovery.tar.md5
