@@ -23,7 +23,7 @@ jobs:
 
       - name: Run custom script
         run: |
-          sudo ./patch.sh
+          ./patch.sh
 
       # Subir el archivo patched-recovery.tar.md5 como artefacto
       - name: Upload patched-recovery.tar.md5 as artifact

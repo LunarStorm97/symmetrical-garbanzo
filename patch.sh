@@ -1,37 +1,39 @@
+#!/bin/bash
+
 # Instalar dependencias necesarias
-apt-get install lz4 tar openssl
+apt-get install -y lz4 tar openssl
 
 # Descomprimir recovery.img.lz4 si existe
 if [ -f recovery.img.lz4 ]; then
     lz4 -f recovery.img.lz4 recovery.img
-fi
-
-# Renombrar el archivo original si existe
-if [ -f recovery.img.lz4 ]; then
     mv recovery.img.lz4 recovery.img.lz4-orig
 fi
 
-# Obtener el offset de SEANDROIDENFORCE
+# Extraer imagen base
 off=$(grep -ab -o SEANDROIDENFORCE recovery.img | tail -n 1 | cut -d : -f 1)
-dd if=recovery.img of=r.img bs=4k count=$off iflag=count_bytes
+if [ -n "$off" ]; then
+    dd if=recovery.img of=r.img bs=4k count="$off" iflag=count_bytes
+else
+    echo "Error: No se pudo encontrar el marcador SEANDROIDENFORCE"
+    exit 1
+fi
 
-# Generar clave si no existe
+# Generar clave RSA si no existe
 if [ ! -f phh.pem ]; then
     openssl genrsa -f4 -out phh.pem 4096
 fi
 
-# Crear directorio para la extracción
-mkdir unpack
+# Crear directorio de trabajo
+mkdir -p unpack
 cd unpack
 
-# Desempaquetar el archivo con magiskboot
+# Desempaquetar y modificar ramdisk
 ../magiskboot unpack ../r.img
 ../magiskboot cpio ramdisk.cpio extract
 cp prop.default ../prop.default
 
-# Realizar parches en el archivo de recuperación
+# Aplicar parches binarios
 ../magiskboot hexpatch system/bin/recovery e10313aaf40300aa6ecc009420010034 e10313aaf40300aa6ecc0094
-# (otros parches aquí)
 ../magiskboot hexpatch system/bin/recovery eec3009420010034 eec3009420010035
 ../magiskboot hexpatch system/bin/recovery 3ad3009420010034 3ad3009420010035
 ../magiskboot hexpatch system/bin/recovery 50c0009420010034 50c0009420010035
@@ -43,39 +45,24 @@ cp prop.default ../prop.default
 ../magiskboot hexpatch system/bin/recovery 24f0fcee30b1681c 24f0fcee30b9681c
 ../magiskboot hexpatch system/bin/recovery 27f02eeb30b1681c 27f02eeb30b9681c
 
-# Volver a empaquetar y agregar archivos
+# Reagregar archivos al ramdisk
 ../magiskboot cpio ramdisk.cpio 'add 0755 system/bin/recovery system/bin/recovery'
 ../magiskboot cpio ramdisk.cpio 'add 0755 prop.default prop.default'
 
-# Reempaquetar la imagen de arranque
+# Reempaquetar imagen
 ../magiskboot repack ../r.img new-boot.img
 cp new-boot.img ../recovery-patched.img
 cd ..
 
-# Limpiar archivos temporales
-rm recovery.img
-mv recovery-patched.img recovery.img
-
-# Comprimir recovery.img a .lz4
-if [ -f recovery.img ]; then
+# Comprimir y empaquetar archivos finales
+if [ -f recovery-patched.img ]; then
+    mv recovery-patched.img recovery.img
     lz4 -B6 --content-size recovery.img
+    tar cvf patched-recovery.tar recovery.img.lz4 vbmeta.img.lz4
+    md5sum -t patched-recovery.tar >> patched-recovery.tar
+    mv patched-recovery.tar patched-recovery.tar.md5
 fi
-
-# Crear el archivo tar con los archivos .lz4
-tar cvf patched-recovery.tar recovery.img.lz4 vbmeta.img.lz4
-
-# Generar y guardar la suma MD5 en un archivo separado
-if [ -f patched-recovery.tar ]; then
-    md5sum patched-recovery.tar > patched-recovery.tar.md5
-fi
-
-# Mover el archivo final
-mv patched-recovery.tar patched-recovery.tar.md5
 
 # Limpiar archivos temporales
-rm r.img
-rm -r unpack
-rm recovery.img
-rm recovery.img.lz4
-rm phh.pem
-rm prop.default
+rm -f r.img recovery.img recovery.img.lz4 phh.pem prop.default
+rm -rf unpack
