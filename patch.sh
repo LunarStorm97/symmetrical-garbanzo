@@ -6,6 +6,7 @@ if [ -f recovery.img.lz4 ]; then
 fi
 
 off=$(grep -ab -o SEANDROIDENFORCE recovery.img | tail -n 1 | cut -d : -f 1)
+
 if [ -n "$off" ]; then
     dd if=recovery.img of=r.img bs=4k count="$off" iflag=count_bytes
 fi
